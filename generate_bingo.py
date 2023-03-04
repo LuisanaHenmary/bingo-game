@@ -41,7 +41,7 @@ class Game:
             minor+=15
             major+=15
 
-        matriz_game["N"][2] = "F"
+        matriz_game["N"][2] = "*"
 
         return matriz_game
 
@@ -87,6 +87,43 @@ class Game:
     def get_combinations(self):
         return self.__combinations
 
+    def vertical_validation(self):
+
+        for index, player in enumerate(self.__data_players):
+            for letter in ["B", "I", "N", "G", "O"]:
+
+                if len(set(player["board"][letter]))==1:
+                    self.__data_players[index]["bingo"] = True
+                    return 1
+
+    def horizontal_validation(self):
+        aux = []
+
+        for index, player in enumerate(self.__data_players):
+            for position in range(5):
+
+                aux = [player["board"][letter][position] for letter in ["B", "I", "N", "G", "O"]]
+
+                if len(set(aux))==1:
+                    self.__data_players[index]["bingo"] = True
+                    return 1
+                
+                aux.clear()
+
+    def diagonal_validation(self):
+        diagonals = [[("B",0),("I",1),("N",2),("G",3),("O",4)],[("B",4),("I",3),("N",2),("G",1),("O",0)]]
+
+        for index, player in enumerate(self.__data_players):
+            for diagonal in diagonals:
+                aux = [player["board"][letter][position] for letter, position in diagonal]
+
+                if len(set(aux))==1:
+                        self.__data_players[index]["bingo"] = True
+                        return 1
+
+                aux.clear()    
+                
+
     def move(self):
         
 
@@ -106,7 +143,22 @@ class Game:
                 self.__combinations[position]["view"] = True
                 break
 
+        self.vertical_validation()
+        self.horizontal_validation()
+        self.diagonal_validation()
+
+    
+
     def reset(self):
         self.__data_players.clear()
         self.__combinations.clear()
         self.generate_combinations()
+
+    def say_bingo(self):
+        for player in self.__data_players:
+            if player["bingo"]:
+                win_name = player["PlayerName"]
+                print(f"{ win_name } dice BINGO")
+                return True
+
+        return False

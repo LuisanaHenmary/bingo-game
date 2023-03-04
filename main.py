@@ -1,6 +1,7 @@
 from generate_bingo import Game
 import os
 import time
+import pandas
 
 if __name__=="__main__":
 
@@ -9,12 +10,17 @@ if __name__=="__main__":
     os.system("cls")
     for i in range(2):
         game.input_data()
-  
-    for i in range(10):
-        game.print_boards()
+    
+    game.print_boards()
+
+    for i in range(75):
         game.move()
         time.sleep(2)
-            
-    game.reset()
+        game.print_boards()
+        if game.say_bingo():
+            break
+        
+    
 
+    game.diagonal_validation()
         
