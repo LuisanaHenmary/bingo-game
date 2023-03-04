@@ -1,0 +1,8 @@
+#Una carpeta que se cre por defecto
+/__pycache__
+
+#Entorno de desarrollo
+/myvenv
+
+#desarrolle en visual studio code
+/.vscode
