@@ -1,6 +1,7 @@
 import random
 import pandas as pd
 import os
+import json
 
 class Game:
 
@@ -122,9 +123,28 @@ class Game:
                         return 1
 
                 aux.clear()    
-                
+    
+    def full_board_validation(self):
+        
+        
+        for index, player in enumerate(self.__data_players):
+            count = 0
+            for letter in ["B", "I", "N", "G", "O"]:
 
-    def move(self):
+                if len(set(player["board"][letter])) > 1:
+                    break
+                else:
+                    count+=1
+
+            if count == 5:
+                self.__data_players[index]["bingo"] = True
+                return 1
+
+            
+                    
+
+
+    def move(self, game_mode):
         
 
         while True:
@@ -133,7 +153,12 @@ class Game:
             if not self.__combinations[position]["view"]:
                 letter = self.__combinations[position]["column"]
                 number = self.__combinations[position]["number"]
-                print(letter, number)
+                
+
+                
+                move_json = json.dumps({"move":{"col":letter,"number":number}}) #retorna un string que es un objeto json
+                print(move_json)
+
                 for player in self.__data_players:
                     for index, value in enumerate(player["board"][letter]):
                         if type(value) is not str:
@@ -143,10 +168,13 @@ class Game:
                 self.__combinations[position]["view"] = True
                 break
 
-        self.vertical_validation()
-        self.horizontal_validation()
-        self.diagonal_validation()
-
+        if game_mode == 1:
+            self.vertical_validation()
+            self.horizontal_validation()
+            self.diagonal_validation()
+        
+        if game_mode == 2:
+            self.full_board_validation()
     
 
     def reset(self):
