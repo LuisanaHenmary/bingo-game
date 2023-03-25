@@ -14,6 +14,8 @@ class Players:
             "bingo": False
         }
         self.__data_players.append(player)
+    
+        return player
 
     def get_players(self):
         return self.__data_players

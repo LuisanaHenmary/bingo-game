@@ -8,8 +8,10 @@
 </head>
 <body>
     <h1>Python && SocketIO</h1>
+    <h2 id="anuncio"></h2>
     <ul id="messages">
-        <input type="text" id="myMessage">
+        <input type="text" id="playername">
+   <!--     <input type="text" id="myMessage">-->
         <button type="button" id="send">Send</button>
     </ul>
     <!--   JQuery  libreria -->
@@ -23,24 +25,36 @@
         socket.on('connect',function(){
             console.log('Conectado')
         })
+        
         socket.on('disconnect',function(){
             console.log('Desconectado')
         })
         
         // socket a la escucha del evento message  y luego se agrega una linea a la lista ul del body
-        socket.on('message', function(msg){
+        socket.on('message', (msg)=>{
             $('#messages').append('<li>'+ msg +'</li>')
 
         });
-        // Se envia por el socket la info al servidor
-        $('#send').on('click', function(){
-            socket.send($('#myMessage').val());
-            $('#myMessage').val('')
+
+        socket.on('anuncio', (msg)=>{
+            $("#anuncio").text(msg)
+
         });
+
+        socket.on('accept_player', (data)=>{
+            console.log(data)
+
+        });
+
+        $('#send').on('click', ()=>{
+            socket.emit('accept',$('#playername').val());
+        });
+        
+
     </script>
 <!--
 
-# Mensaje a servidor de querer unirse a la partida
+
 
 
 
