@@ -54,7 +54,7 @@ def acceptPlayer(playername):
     else:
         room_wait.append(playername)
         send('Sala llena')
-        emit('anuncio',f"Partida en curso", broadcast=True)
+        emit('anuncio',f"Juego en curso", broadcast=True)
         
 
     #anuncia
@@ -62,7 +62,7 @@ def acceptPlayer(playername):
 
     #Comienza el juego si hay solo dos jugadores
     if len(players.get_players()) == 2:
-            emit('anuncio',f"Partida en curso", broadcast=True)
+            emit('anuncio',f"Juego en curso", broadcast=True)
             for i in range(8): #Deben ser 75 el ocho es para las pruenas
                 index = random.randint(0,combinations.get_num_available()-1)
                 letter, number = combinations.get_combination(index)
