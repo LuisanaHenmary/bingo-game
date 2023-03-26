@@ -36,6 +36,10 @@
 
         });
 
+        socket.on('send_combination',(msg)=>{
+            $('#messages').append(`<li>${msg.letter} ${msg.number}</li>`)
+        })
+
         socket.on('anuncio', (msg)=>{
             $("#anuncio").text(msg)
 
@@ -46,8 +50,12 @@
 
         });
 
+        socket.on('startGame',(msg)=>{
+            $("#anuncio").text(msg)
+        })
+
         $('#send').on('click', ()=>{
-            socket.emit('accept',$('#playername').val());
+            socket.emit('join',$('#playername').val());
         });
         
 

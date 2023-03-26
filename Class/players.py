@@ -11,7 +11,8 @@ class Players:
         player = {
             'PlayerName':playername,
             'board': board,
-            "bingo": False
+            "bingo": False,
+            'room':"game_room"
         }
         self.__data_players.append(player)
     
