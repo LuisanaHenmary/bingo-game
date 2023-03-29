@@ -1,66 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SocketIO en Flask</title>
 </head>
+
 <body>
     <h1>Python && SocketIO</h1>
+
     <h2 id="anuncio"></h2>
+
+    <h3 id="combination"></h3>
+    <table id="board">
+        <thead>
+            <tr id="letters"></tr>
+        </thead>
+
+        <tbody>
+            <tr id="r0"></tr>
+            <tr id="r1"></tr>
+            <tr id="r2"></tr>
+            <tr id="r3"></tr>
+            <tr id="r4"></tr>
+        </tbody>
+    </table>
+
     <ul id="messages">
         <input type="text" id="playername">
-   <!--     <input type="text" id="myMessage">-->
+        <!--     <input type="text" id="myMessage">-->
         <button type="button" id="send">Send</button>
     </ul>
+
     <!--   JQuery  libreria -->
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"
+        integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+
     <!--   SocketIO  libreria -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js" charset="UTF-8"></script>
+
     <script>
         const socket = io(); // Funcion io() 
 
         //Evento que sirve de comprobacion para coneccion
-        socket.on('connect',function(){
+        socket.on('connect', function () {
             console.log('Conectado')
         })
-        
-        socket.on('disconnect',function(){
+
+        socket.on('disconnect', function () {
             console.log('Desconectado')
         })
-        
+
         // socket a la escucha del evento message  y luego se agrega una linea a la lista ul del body
-        socket.on('message', (msg)=>{
-            $('#messages').append('<li>'+ msg +'</li>')
+        socket.on('message', (msg) => {
+            $('#messages').append('<li>' + msg + '</li>')
 
         });
 
-        socket.on('send_combination',(msg)=>{
+        socket.on('send_combination', (msg) => {
             $('#messages').append(`<li>${msg.letter} ${msg.number}</li>`)
+            $('#combination').text(`${msg.letter} ${msg.number}`)
         })
 
-        socket.on('anuncio', (msg)=>{
+        socket.on('end_game', (msg) => {
+            $("#anuncio").text(msg)
+
+            $('#combination').text('')
+            let i = 0;
+
+            for (let x in board) {
+                $('#letters').text('')
+            }
+
+            while (i < 5) {
+                $(`#r${i}`).text('')
+                i++
+            }
+
+
+        });
+
+        socket.on('anuncio', (msg) => {
             $("#anuncio").text(msg)
 
         });
 
-        socket.on('accept_player', (data)=>{
-            console.log(data)
 
+
+        socket.on('accept_player', (data) => {
+
+            board = data["board"]
+
+            console.log(board)
+
+            let i = 0;
+
+            for (let x in board) {
+                $('#letters').append(`<th>${x}</th>`)
+            }
+
+
+            for (let letter in board) {
+                i = 0
+                while (i < 5) {
+                    $(`#r${i}`).append(`<td>${board[letter][i]}</td>`)
+                    i++
+                }
+            }
         });
 
-        socket.on('startGame',(msg)=>{
+        socket.on('automatic_join', (data) => {
+            $('#messages').append(`<li>Automatic joid</li>`)
+            socket.emit('join', {
+                "id": data.id,
+                "playername": data.playername
+            });
+        });
+
+        socket.on('startGame', (msg) => {
             $("#anuncio").text(msg)
+            socket.emit('game_on_going')
         })
 
-        $('#send').on('click', ()=>{
-            socket.emit('join',$('#playername').val());
+        $('#send').on('click', () => {
+            const id_client = socket.id
+            socket.emit('join', {
+                "id": id_client,
+                "playername": $('#playername').val()
+            });
         });
-        
+
+
 
     </script>
-<!--
+    <!--
 
 
 
@@ -78,4 +153,5 @@
 -->
 
 </body>
+
 </html>

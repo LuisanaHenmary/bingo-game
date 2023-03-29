@@ -8,6 +8,7 @@ from flask_socketio import (
     close_room
     )
 
+import pandas as pd
 import time
 import random
 from Class.combinations import Combinations
@@ -32,6 +33,7 @@ def hello():
 def disconnect():
     print("Desconectado")
 
+
 @socketio.on('connect') #evento escuchador
 def connect():
     emit('anuncio',f"Numero de vacante para jugar {2-len(players.get_players())}")
@@ -40,46 +42,56 @@ def connect():
 @socketio.on('evento') #evento escuchador
 def evento(json):
     print("Este es el objeto Json "+json)
-    emit('evento', json) # evento emisor       
+    #emit('evento', json) # evento emisor       
 
 #Recibe peticiones de Jugadores a unirse el juego
 @socketio.on('join')
-def acceptPlayer(playername):
+def acceptPlayer(info):
+    
     if len(players.get_players()) < 2:
-        data = players.new_player(playername)
+        data = players.new_player(info["playername"])
         room = data['room']
         join_room(room)
         emit('accept_player', data)  
+        send(info["playername"] + ' has entered the room.', to=room)
         emit('anuncio',f"Numero de vacante para jugar {2-len(players.get_players())}", broadcast=True)
+
+        if len(players.get_players()) == 2:
+            emit('startGame')
+        
     else:
-        room_wait.append(playername)
+        room_wait.append(info)
         send('Sala llena')
         emit('anuncio',f"Juego en curso", broadcast=True)
-        
 
-    #anuncia
-    send(playername + ' has entered the room.', to=room)
+@socketio.on('game_on_going')
+def start_game():
+    emit('anuncio',f"Juego en curso", broadcast=True)
+    for i in range(3): #Deben ser 75 el ocho es para las pruenas
+        index = random.randint(0,combinations.get_num_available()-1)
+        letter, number = combinations.get_combination(index)
+        comb = {
+            "letter":letter,
+            "number":number
+        }
+        emit('send_combination',comb, to="game_room") #envia la combinacion a los integrantes de la sala
+        time.sleep(5)
+    send("Fin del juego vuelva pronto", to="game_room")
+    players.reboot()
+    combinations.reboot()
+    close_room('game_room')
+    emit('end_game',f"Numero de vacante para jugar {2-len(players.get_players())}", broadcast=True)
 
-    #Comienza el juego si hay solo dos jugadores
-    if len(players.get_players()) == 2:
-            emit('anuncio',f"Juego en curso", broadcast=True)
-            for i in range(8): #Deben ser 75 el ocho es para las pruenas
-                index = random.randint(0,combinations.get_num_available()-1)
-                letter, number = combinations.get_combination(index)
-                comb = {
-                    "letter":letter,
-                    "number":number
-                }
-                emit('send_combination',comb, to="game_room") #envia la combinacion a los integrantes de la sala
-                time.sleep(5)
-            send("Fin del juego vuelva pronto", to="game_room")
-            players.reboot()
-            combinations.reboot()
-            close_room('game_room')
+    if (len(room_wait)==1):
+        player = room_wait.pop(0)
+        emit('automatic_join', player,to=player["id"])
+    
+    elif (len(room_wait)>=2):
+        for i in range(2):
+            player = room_wait.pop(i)
+            emit('automatic_join', player,to=player["id"])
 
-            #proximente trabajar en sala de espera
-            
-            emit('anuncio',f"Numero de vacante para jugar {2-len(players.get_players())}", broadcast=True)
+    
     
 @socketio.on('message') # evento escuchador llamado message
 def handlerMessage(playername):
