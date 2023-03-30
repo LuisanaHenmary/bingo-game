@@ -16,6 +16,7 @@ class Game:
     def __init__(self) -> None:
         self.__players = Players()
         self.__combinations = Combinations()
+        
 
     def print_boards(self):
         
@@ -23,14 +24,17 @@ class Game:
         for player in self.__players.get_players():
             print_board(player)
 
-    def input_data(self):
-        name = input("Ingrese su nombre: ")
-        self.__players.new_player(name)
+    def input_data(self,id,name):
+        player = self.__players.new_player(id,name)
+        return player
 
-    def move(self, game_mode,index):
+    def get_comb(self,index):
+        letter, number = self.__combinations.get_combination(index)
+        return (letter, number)
+
+    def move(self,index, game_mode=1):
         
         letter, number = self.__combinations.get_combination(index)
-        print(f"{letter} {number}")
         
         for player in self.__players.get_players():
 
@@ -39,31 +43,37 @@ class Game:
             if game_mode==1:
                 if vertical_validation(player["board"]):
                     player['bingo']=True
-                    return 1
+                    return (letter, number)
                 if horizontal_validation(player["board"]):
                     player['bingo']=True
-                    return 1
+                    return (letter, number)
                 if diagonal_validation(player['board']):
                     player['bingo']=True
-                    return 1
+                    return (letter, number)
 
             if game_mode==2:
                 if full_board_validation(player['board']):
                     player['bingo']=True
-                    return 1
+                    return (letter, number)
+        return (letter, number)
         
 
     def num_available_combinations(self):
         return self.__combinations.get_num_available()
 
+    def get_players_list(self):
+        return self.__players.get_players()
+
+    def get_players_list_len(self):
+        return len(self.__players.get_players())
+
     def say_bingo(self):
         for player in self.__players.get_players():
             if player["bingo"]:
-                win_name = player["PlayerName"]
-                print(f"{ win_name } dice BINGO")
-                return True
+                
+                return player
 
-        return False
+        return {}
 
     def reboot(self):
         self.__combinations.reboot()
