@@ -13,13 +13,14 @@ myvenv\Scripts\activate.bat (con Windows)
 # Para obterner la dependencias usadas en esto, se debe tener el entorno activado
 pip install -r dependencies.txt
 
+# Para actulizar dependencies.txt conforme agregue nuevas librerias al entorno virtual
+pip freeze > dependencies.txt
+
+
 # Para la lista de dependencias
 pip list
 
 # Para ejecutar
 
-# La version sin sockets
-python main.py 
-
-# La version con sockets
-python main2.py 
+# Modulo principal
+python main.py

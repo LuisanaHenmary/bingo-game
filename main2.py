@@ -110,4 +110,4 @@ def handlerMessage(playername):
     send(playername, broadcast=True) # envio de mensaje a los clientes tipo broadcast    
 
 if __name__ == "__main__":
-    socketio.run(app)
+    socketio.run(app, debug=True, port=5000, host='localhost')
