@@ -32,6 +32,13 @@
         <input type="text" id="playername">
         <!--     <input type="text" id="myMessage">-->
         <button type="button" id="send">Send</button>
+        <br/>
+        <input type="radio" name="mode" id="line5" value="1" checked>
+        <label for="line5">Cinco en fila</label>
+        <br/>
+        <input type="radio" name="mode" id="full" value="2">
+        <label for="full">Lleno</label>
+
     </ul>
 
     <!--   JQuery  libreria -->
@@ -42,6 +49,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js" charset="UTF-8"></script>
 
     <script>
+        
         const socket = io(); // Funcion io() 
 
         let my_board;
@@ -143,7 +151,7 @@
 
         socket.on('startGame', (msg) => {
             $("#anuncio").text(msg)
-            socket.emit('game_on_going')
+            socket.emit('game_on_going',$("input:radio[name='mode']:checked").val())
         })
 
         $('#send').on('click', () => {
