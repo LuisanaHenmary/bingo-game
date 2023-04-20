@@ -4,14 +4,11 @@ from flask_socketio import (
     send,
     emit,
     join_room,
-    leave_room,
     close_room
     )
 
 import time
 import random
-from Class.combinations import Combinations
-from Class.players import Players
 from game import Game
 
 app = Flask(__name__)
@@ -24,6 +21,7 @@ game = Game()
 
 room_wait = []
 disconnect_players = []
+
 
 @app.route("/")
 def hello():
@@ -45,17 +43,10 @@ def connect():
         emit('anuncio',f"Numero de vacante para jugar {2-game.get_players_list_len()}")
 
 
-@socketio.on('evento') #evento escuchador
-def evento(json):
-    print(f"Este es el objeto Json {json}")
-    for player in game.get_players_list():
-        pass
-
-
 #Recibe peticiones de Jugadores a unirse el juego
 @socketio.on('join')
 def acceptPlayer(info):
-    
+
     if game.get_players_list_len() < 2:
         data= game.input_data(info["id"],info["playername"])
         #data = players.new_player(info["id"],info["playername"])
@@ -73,9 +64,8 @@ def acceptPlayer(info):
         send('Sala llena')
 
 @socketio.on('game_on_going')
-def start_game():
+def start_game(mode):
     emit('anuncio',f"Juego en curso", broadcast=True)
-
     for i in range(75): #Deben ser 75 el ocho es para las pruenas
 
         if len(disconnect_players) == 2:
@@ -84,7 +74,7 @@ def start_game():
         
         time.sleep(3)
         index = random.randint(0,game.num_available_combinations()-1)
-        letter, number = game.move(index)
+        letter, number = game.move(index,game_mode=int(mode))
 
         comb = {
             "letter":letter,
@@ -105,14 +95,13 @@ def start_game():
     close_room('game_room')
     emit('end_game',f"Numero de vacante para jugar {2-game.get_players_list_len()}", broadcast=True)
 
-    if (len(room_wait)==1):
+
+    while True:
+        if (game.get_players_list_len()==2) or (len(room_wait)==0):
+            break
         player = room_wait.pop(0)
         emit('automatic_join', player,to=player["id"])
-    
-    elif (len(room_wait)>=2):
-        for i in range(20):
-            player = room_wait.pop(i)
-            emit('automatic_join', player,to=player["id"])
+        
 
     
     
@@ -122,27 +111,3 @@ def handlerMessage(playername):
 
 if __name__ == "__main__":
     socketio.run(app)
-    
-
-#Anuncio Broadcast que esta Activo
-
-
-
-
-# Crear tablero con jugadores
-
-
-# Emitir cartones  
-
-
-# Recibir aceptacion de jugadores de los cartones  
-
-
-# Emitir numeros
-
-
-# Comprobar si hay ganador y cerrar juego
-
-
-# Anuncio broadcast de ganador
-

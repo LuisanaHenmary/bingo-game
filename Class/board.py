@@ -1,5 +1,4 @@
 import random
-import pandas as pd
 
 def unique_number(x, L):
 
@@ -32,7 +31,6 @@ def generate_matrix():
         major+=15
 
     return matriz_game
-        #self.__matrix["N"][2] = "*"
 
 def marking_cell(board,letter,number):
     
@@ -91,10 +89,3 @@ def full_board_validation(board):
         return True
         
     return False
-
-def print_board(player):
-    print(player["PlayerName"])            
-    table_game = pd.DataFrame(player["board"])
-    print(table_game.to_string(index=False))
-    print("\n")
-    

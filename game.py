@@ -1,4 +1,3 @@
-import os
 from Class.players import Players
 from Class.combinations import Combinations
 from Class.board import (
@@ -7,22 +6,13 @@ from Class.board import (
     horizontal_validation,
     diagonal_validation,
     full_board_validation,
-    print_board
 )
-
 
 class Game:
     
     def __init__(self) -> None:
         self.__players = Players()
         self.__combinations = Combinations()
-        
-
-    def print_boards(self):
-        
-        os.system("cls")
-        for player in self.__players.get_players():
-            print_board(player)
 
     def input_data(self,id,name):
         player = self.__players.new_player(id,name)
