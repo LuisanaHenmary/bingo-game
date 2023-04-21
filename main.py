@@ -29,16 +29,21 @@ disconnect_players = []
 def hello():
     return render_template('index.html')
 
-@socketio.on('disconnect') #evento escuchador
+@socketio.on('disconnect') #evento cuando se desconecta alguien
 def disconnect():
+
+    """
+        Si se desconecta alguien verifica si es uno o los dos jugadores que estan en juego
+    """
+
     for  player in game.get_players_list():
         if request.sid == player["id"]:
             disconnect_players.append(player)
             send(f"Disconnect {player['PlayerName']}", to=player["room"])
 
-@socketio.on('connect') #evento escuchador
+@socketio.on('connect') #Cuando alguien se conecta
 def connect():
-
+    #Un anuncio para los recien conectados
     if game.get_players_list_len()==2:
         emit('anuncio',f"Juego en curso")
     else:
@@ -49,28 +54,36 @@ def connect():
 @socketio.on('join')
 def acceptPlayer(info):
 
-    if game.get_players_list_len() < 2:
+    if game.get_players_list_len() < 2: #Si hay 0 o solo un jugador se agregara un nuevo jugador
         data= game.input_data(info["id"],info["playername"])
-        #data = players.new_player(info["id"],info["playername"])
-        room = data['room']
+        room = data['room'] #Solo sala game_room recibira las combinaciones de letra y numero
         join_room(room)
         emit('accept_player', data)  
         send(info["playername"] + ' has entered the room.', to=room)
         emit('anuncio',f"Numero de vacante para jugar {2-game.get_players_list_len()}", broadcast=True)
 
-        if game.get_players_list_len() == 2:
+        if game.get_players_list_len() == 2: #Si ya estando los dos emete el evento startGame al cliente
             emit('startGame')
         
     else:
         room_wait.append(info)
         send('Sala llena')
 
-@socketio.on('game_on_going')
+@socketio.on('game_on_going') #evento de juego en curso
 def start_game(mode):
-    emit('anuncio',f"Juego en curso", broadcast=True)
-    for i in range(75): #Deben ser 75 el ocho es para las pruenas
 
-        if len(disconnect_players) == 2:
+    """
+        Inicia el juego que cuya modalidad se determinar por el valor de mode:
+        1 -> 5 en linea
+        2 -> carton lleno
+    
+    """
+
+    emit('anuncio',f"Juego en curso", broadcast=True)
+
+    for i in range(75):
+
+        if len(disconnect_players) == 2: #Si los dos jugadores se desconectan el juego para y reinicia
             disconnect_players.clear()
             break
         
@@ -84,9 +97,10 @@ def start_game(mode):
             "num_com":game.num_available_combinations()
         }
 
-        emit('send_combination',comb, to="game_room") #envia la combinacion a los integrantes de la sala
+        emit('send_combination',comb, to="game_room") #envia la combinacion a los integrantes de la sala y tambien la cantidad de fichas disponible
         
-        winner = game.say_bingo()
+        winner = game.say_bingo() #Verifica si un jugaros ya tiene el bingo en True, y si es asi devuelve un diccionario con los datos del ganador
+        #sino un diccionario vacio
 
         if len(winner) > 0:
             send(f"{winner['PlayerName']} WIN", to="game_room")
@@ -97,12 +111,12 @@ def start_game(mode):
     close_room('game_room')
     emit('end_game',f"Numero de vacante para jugar {2-game.get_players_list_len()}", broadcast=True)
 
-
+    #Si hay jugadores en sala de espera, dos de ello se uniran al juego automaticamente 
     while True:
         if (game.get_players_list_len()==2) or (len(room_wait)==0):
             break
         player = room_wait.pop(0)
-        emit('automatic_join', player,to=player["id"])
+        emit('automatic_join', player,to=player["id"]) #Si tal persona se desconecto antes no habra daño
         
 
     

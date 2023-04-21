@@ -14,6 +14,7 @@
     <h2 id="anuncio"></h2>
     <h2 id="count-combinations"></h2>
     <h3 id="combination"></h3>
+
     <table id="board">
         <thead>
             <tr id="letters"></tr>
@@ -30,7 +31,6 @@
 
     <ul id="messages">
         <input type="text" id="playername">
-        <!--     <input type="text" id="myMessage">-->
         <button type="button" id="send">Send</button>
         <br/>
         <input type="radio" name="mode" id="line5" value="1" checked>
@@ -54,6 +54,8 @@
 
         let my_board;
 
+        //Limpia el tablerp
+
         const clear_display_board = () =>{
 
             let i=0;
@@ -65,6 +67,8 @@
             }
         }
 
+
+        //Cambia el tablero 
         const print_board = () => {
 
             let i = 0;
@@ -96,11 +100,13 @@
         })
 
 
+        //Evento de recibir un mensaje del servidor
         socket.on('message', (msg) => {
             $('#messages').append('<li>' + msg + '</li>')
 
         });
 
+        //Evento cuando el servidor envia una combinacion en pleno juego
         socket.on('send_combination', (msg) => {
             
             $('#combination').text(`Casilla: ${msg.letter} ${msg.number}`);
@@ -118,6 +124,7 @@
 
         })
 
+        //Cuando el servidor finaliza el juego
         socket.on('end_game', (msg) => {
 
             $("#send").prop("disabled", false)
@@ -130,17 +137,20 @@
             
         });
 
+        //Anuncio a todos los conectados
         socket.on('anuncio', (msg) => {
             $("#anuncio").text(msg)
 
         });
 
 
+        //Cuando el servidor acepta la solicitud para unirse al juego
         socket.on('accept_player', (data) => {
             my_board = data["board"]
             print_board()
         });
 
+        //El servidor une automaticamente al conectado que estaba en espera
         socket.on('automatic_join', (data) => {
             $('#messages').append(`<li>Automatic joid</li>`)
             socket.emit('join', {
@@ -149,15 +159,18 @@
             });
         });
 
+        //Cuando el servidor declara que se inicio el juego
         socket.on('startGame', (msg) => {
             $("#anuncio").text(msg)
-            socket.emit('game_on_going',$("input:radio[name='mode']:checked").val())
+            // la modalidad depende del valor del radio llamado mode que fue seleccionado
+            socket.emit('game_on_going',$("input:radio[name='mode']:checked").val()) 
         })
 
         $('#send').on('click', () => {
             $("#send").prop("disabled", true)
             $("#playername").prop("disabled", true)
             const id_client = socket.id
+            //Enviando solicitud para unirse al juego
             socket.emit('join', {
                 "id": id_client,
                 "playername": $('#playername').val()
